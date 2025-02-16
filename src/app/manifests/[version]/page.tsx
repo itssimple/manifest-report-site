@@ -33,14 +33,33 @@ function getManifestFromList(version: string) : ManifestListItem {
 	return manifestList.find((post: ManifestListItem) => post.VersionId === version);
 }
 
+function ogDescription(manifest: ManifestListItem) {
+	let totalChangedFiles = 0;
+	let totalChanges = 0;
+	manifest.DiffFiles.forEach((file) => {
+		totalChangedFiles++;
+		totalChanges += file.Added + file.Modified + file.Unclassified + file.Removed + file.Reclassified;
+	});
+	return `Manifest version ${manifest.Version} was discovered on ${manifest.DiscoverDate_UTC}
+	And has ${totalChangedFiles} files changed with a total of ${totalChanges} changes`;
+}
+
 export async function generateMetadata(
 	{ params }: { params: Promise<{ version: string }> },
 	//parent: ResolvingMetadata
 ): Promise<Metadata> {
 	const { version } = await params;
+
+	const manifest = getManifestFromList(version);
 	return {
 		title: `Manifest version ${version} - Manifest.report`,
 		description: `Changes for version ${version}`,
+		openGraph: {
+			title: `Destiny 2 Manifest ${manifest.Version} information`,
+			releaseDate: getManifestFromList(version).DiscoverDate_UTC,
+			url: `https://site.manifest.report/manifests/${version}`,
+			description: ogDescription(manifest)
+		}
 	}
 }
 
