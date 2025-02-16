@@ -1,4 +1,4 @@
-import { ManifestListItem } from "@/types/manifestListTypes";
+import { FileStatus, ManifestListItem } from "@/types/manifestListTypes";
 import Link from "next/link";
 
 export function cleanDefinitionName(name: string) {
@@ -70,7 +70,9 @@ export function displayDiffTable(manifest: ManifestListItem) {
             <tr key={file.FileName}
               className={isJunkDefinition(file.FileName) ?
                 " text-gray-50/25 hover:text-white transition-all duration-300" :
-                ""}
+                ""
+                + (file.FileStatus === FileStatus.Added ? " bg-green-950/75" : "")
+              + (file.FileStatus === FileStatus.Removed ? " bg-red-950/75" : "")}
             >
               <td className="text-left">
                 <Link href={`/manifests/${manifest.VersionId}/${cleanDefinitionName(file.FileName)}`}
