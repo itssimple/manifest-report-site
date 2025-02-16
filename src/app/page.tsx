@@ -12,7 +12,7 @@ export default function Home() {
         <Link href="/manifests" className="text-white bg-blue-800 ring-4 rounded-lg pl-4 pr-4">Check the manifest list</Link>
       </main>
       <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        A footer will be here soon
+        © {new Date().getFullYear()} manifest.report / NoLifeKing85#2914
       </footer>
     </div>
   );

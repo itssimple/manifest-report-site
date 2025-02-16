@@ -34,7 +34,7 @@ const junkDefinitions = [
 ];
 
 export function isJunkDefinition(name: string) : boolean {
-	return junkDefinitions.includes(name);
+	return junkDefinitions.includes(cleanDefinitionName(name));
 }
 
 export function displayDate(date: string) {
@@ -54,7 +54,7 @@ export function displayDiffTable(manifest: ManifestListItem) {
     </div>
     <div className="clear-both mb-5"></div>
     {manifest.DiffFiles.length === 0 ?
-      <div className="text-center block italic">No changes</div> :
+      <div className="text-center block italic">No changes in this version</div> :
       <table className="table-fixed w-full">
         <thead>
           <tr>
@@ -68,7 +68,7 @@ export function displayDiffTable(manifest: ManifestListItem) {
         <tbody>
           {manifest.DiffFiles.map((file) => (
             <tr key={file.FileName}
-              className={isJunkDefinition(cleanDefinitionName(file.FileName)) ?
+              className={isJunkDefinition(file.FileName) ?
                 " text-gray-50/25 hover:text-white transition-all duration-300" :
                 ""}
             >
