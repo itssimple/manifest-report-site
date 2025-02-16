@@ -1,31 +1,28 @@
+import { cleanDefinitionName } from "@/app/shared-methods";
 import { DiffFile, ManifestListItem } from "@/types/manifestListTypes";
 import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
 
+const s3 = new S3Client({
+	region: "manifest-report",
+	credentials: {
+		accessKeyId: process.env.S3ACCESSKEY!,
+		secretAccessKey: process.env.S3SECRETKEY!
+	},
+	endpoint: process.env.S3ENDPOINT!,
+	forcePathStyle: true
+}
+);
+
+const getManifestList = new GetObjectCommand({
+	Bucket: "manifest-archive",
+	Key: "list.json",
+});
+
+const manifestListObject = await s3.send(getManifestList);
+
+const manifestList = JSON.parse(await manifestListObject.Body!.transformToString());
+
 export async function generateStaticParams() {
-	const s3 = new S3Client({
-		region: "manifest-report",
-		credentials: {
-			accessKeyId: process.env.S3ACCESSKEY!,
-			secretAccessKey: process.env.S3SECRETKEY!
-		},
-		endpoint: process.env.S3ENDPOINT!,
-		forcePathStyle: true
-	}
-	);
-
-	const getManifestList = new GetObjectCommand({
-		Bucket: "manifest-archive",
-		Key: "list.json",
-	});
-
-	const manifestListObject = await s3.send(getManifestList);
-
-	const manifestList : ManifestListItem[] = JSON.parse(await manifestListObject.Body!.transformToString());
-
-	function cleanDefinitionName(name: string) {
-		return name.replace('/tables/Destiny', '').replace('Definition.json', '');
-	}
-
 	return manifestList.flatMap((post: ManifestListItem) =>
 		post.DiffFiles.map((file: DiffFile) => ({
 			version: post.VersionId,
