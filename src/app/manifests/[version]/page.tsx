@@ -1,8 +1,7 @@
-import { cleanDefinitionName, displayDate, displayDiffTable, isJunkDefinition } from "@/app/shared-methods";
+import { displayDiffTable } from "@/app/shared-methods";
 import { ManifestListItem } from "@/types/manifestListTypes";
 import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
-import { Metadata, ResolvingMetadata } from "next";
-import Link from "next/link";
+import { Metadata } from "next";
 
 const s3 = new S3Client({
 	region: "manifest-report",
@@ -36,7 +35,7 @@ function getManifestFromList(version: string) : ManifestListItem {
 
 export async function generateMetadata(
 	{ params }: { params: Promise<{ version: string }> },
-	parent: ResolvingMetadata
+	//parent: ResolvingMetadata
 ): Promise<Metadata> {
 	const { version } = await params;
 	return {
