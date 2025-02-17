@@ -29,10 +29,6 @@ export function Pager({ currentPage, totalPages, pagingLinkPrefix }: { currentPa
 		startPage = 1;
 	}
 
-	console.log("startPage", startPage);
-	console.log("endPage", endPage);
-	console.log("currentPage", currentPage);
-
 	return (
 		<div className="flex gap-4 items-center justify-center">
 			{currentPage > 1 && (
