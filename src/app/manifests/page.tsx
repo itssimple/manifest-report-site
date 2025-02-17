@@ -2,7 +2,7 @@ import { ManifestListItem } from "@/types/manifestListTypes";
 import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
 import { Metadata } from "next";
 import { displayDiffTable } from "../shared-methods";
-import { Pager } from "../components/Pager";
+import { Pager } from "../../components/Pager";
 
 const s3 = new S3Client({
 	region: "manifest-report",
@@ -46,15 +46,13 @@ const totalPages = Math.ceil(manifestList.length / ITEMS_PER_PAGE);
 
 export default async function Page() {
 	return (
-		<div className="grid grid-rows-[20px_1fr_20px] items-center p-8 min-h-screen font-[family-name:var(--font-geist-sans)]">
       <main className="flex flex-col gap-4 row-start-2 items-start">
-				<h2 className="text-4xl">Manifest list: {manifestList.length} manifests stored</h2>
+				<h2 className="text-4xl">Manifest list: {manifestList.length} manifests stored - Page 1</h2>
 				<hr />
 				{manifestListItems.map((manifest : ManifestListItem) => (
 					displayDiffTable(manifest)
 				))}
 				{totalPages > 1 && (<Pager currentPage={currentPage} totalPages={totalPages} pagingLinkPrefix={"/manifests/p"} />)}
 			</main>
-		</div>
 	)
 }
