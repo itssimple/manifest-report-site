@@ -1,4 +1,15 @@
+import { Metadata } from "next";
 import Link from "next/link";
+
+export const metadata: Metadata = {
+  title: "Manifest.report",
+	description: "Find the changes you're looking for.",
+	openGraph: {
+		title: "Manifest.report",
+		description: "Find the changes you're looking for.",
+		url: "https://site.manifest.report/",
+	}
+};
 
 export default function Home() {
   return (
