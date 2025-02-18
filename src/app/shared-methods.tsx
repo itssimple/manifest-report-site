@@ -42,11 +42,13 @@ export function displayDate(date: string) {
 	return dateObj.toISOString();
 }
 
-export function displayDiffTable(manifest: ManifestListItem) {
+export function displayDiffTable(manifest: ManifestListItem, noLinks: boolean = false) {
   return (<div className="w-full mb-10" key={manifest.VersionId}>
     <div className="block">
       <div className="float-start text-sm md:text-lg">
-        <Link href={`/manifests/${manifest.VersionId}`} className="underline underline-offset-4 decoration-slate-800 hover:decoration-slate-300 transition-all duration-300">{manifest.VersionId}</Link>
+        {noLinks ?
+          <div className="underline underline-offset-4 decoration-slate-800">{manifest.VersionId}</div> :
+          <Link href={`/manifests/${manifest.VersionId}`} className="underline underline-offset-4 decoration-slate-800 hover:decoration-slate-300 transition-all duration-300">{manifest.VersionId}</Link>}
       </div>
       <div className="float-end text-sm md:text-lg clear-end">
         {manifest.Version} / {displayDate(manifest.DiscoverDate_UTC)}
@@ -75,10 +77,14 @@ export function displayDiffTable(manifest: ManifestListItem) {
               + (file.FileStatus === FileStatus.Removed ? " bg-red-950/75" : "")}
             >
               <td className="text-left">
-                <Link href={`/manifests/${manifest.VersionId}/${cleanDefinitionName(file.FileName)}`}
-                  className="underline underline-offset-4 decoration-slate-800 hover:decoration-slate-300 transition-all">
+                {noLinks ? <div className="underline underline-offset-4 decoration-slate-800 transition-all">
                   {cleanDefinitionName(file.FileName)}
-                </Link>
+                </div> :
+                  <Link href={`/manifests/${manifest.VersionId}/${cleanDefinitionName(file.FileName)}`}
+                    className="underline underline-offset-4 decoration-slate-800 hover:decoration-slate-300 transition-all">
+                    {cleanDefinitionName(file.FileName)}
+                  </Link>
+                }
               </td>
               <td className={
                 "text-right" +
