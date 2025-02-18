@@ -3,20 +3,13 @@
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #0a0a0a;
+  --foreground: #ededed;
   --generalBodyCopy: "Neue Haas Grotesk Display Pro 55 Roman", "Helvetica", sans-serif;
   --header75Bold: "Neue Haas Grotesk Display Pro 75 Bold", "Helvetica", sans-serif;
   --header65Medium: "Neue Haas Grotesk Display Pro 65 Medium", "Helvetica", sans-serif;
   --header56Italic: "Neue Haas Grotesk Display Pro 56 Roman Italic", "Helvetica", sans-serif;
   --header55Roman: "Neue Haas Grotesk Display Pro 55 Roman", "Helvetica", sans-serif;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
 }
 
 body {
