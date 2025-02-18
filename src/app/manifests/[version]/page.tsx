@@ -72,7 +72,7 @@ export default async function Page({
 	const manifest = getManifestFromList(version);
 	return (
 		<main className="flex flex-col gap-4 row-start-2 items-start">
-			<h2 className="text-4xl">Manifest: {manifest.Version}</h2>
+			<h2 className="text-lg md:text-4xl">Manifest: {manifest.Version}</h2>
 			<hr />
 			{displayDiffTable(manifest)}
 		</main>

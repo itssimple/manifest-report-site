@@ -60,7 +60,7 @@ export default async function Page({
 
 	return (
 			<main className="flex flex-col gap-4 row-start-2 items-start">
-			<h2 className="text-4xl">Manifest list: {manifestList.length} manifests stored - Page {page}</h2>
+			<h2 className="text-lg md:text-4xl">Manifest list: {manifestList.length} manifests stored - Page {page}</h2>
 				<hr />
 				{manifestListItems.map((manifest : ManifestListItem) => (
 					displayDiffTable(manifest)

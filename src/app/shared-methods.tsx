@@ -45,10 +45,10 @@ export function displayDate(date: string) {
 export function displayDiffTable(manifest: ManifestListItem) {
   return (<div className="w-full mb-10" key={manifest.VersionId}>
     <div className="block">
-      <div className="float-start text-lg">
+      <div className="float-start text-sm md:text-lg">
         <Link href={`/manifests/${manifest.VersionId}`} className="underline underline-offset-4 decoration-slate-800 hover:decoration-slate-300 transition-all duration-300">{manifest.VersionId}</Link>
       </div>
-      <div className="float-end text-lg clear-end">
+      <div className="float-end text-sm md:text-lg clear-end">
         {manifest.Version} / {displayDate(manifest.DiscoverDate_UTC)}
       </div>
     </div>
