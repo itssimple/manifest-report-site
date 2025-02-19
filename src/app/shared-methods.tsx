@@ -119,3 +119,128 @@ export function displayDiffTable(manifest: ManifestListItem, noLinks: boolean = 
       </table>}
   </div>);
 }
+
+export function displayOgDiffTable(manifest: ManifestListItem) {
+
+  const totalAdds = manifest.DiffFiles.reduce((acc, file) => acc + file.Added, 0);
+  const totalMods = manifest.DiffFiles.reduce((acc, file) => acc + file.Modified, 0);
+  const totalUnclassified = manifest.DiffFiles.reduce((acc, file) => acc + file.Unclassified, 0);
+  const totalRemoves = manifest.DiffFiles.reduce((acc, file) => acc + file.Removed, 0);
+
+  return (<div style={{
+    width: "1080px",
+    height: '1080px',
+    display: 'flex',
+    flexDirection: 'column',
+    backgroundColor: 'black',
+    color: 'white',
+    padding: '0.5rem'
+  }} key={ manifest.VersionId } >
+    <div style={{
+      display: 'flex',
+      flexDirection: 'column'
+    }}>
+      <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        fontSize: '3.5rem'
+      }}>
+        Changes for
+        <div style={{
+          textDecoration: 'underline',
+          textDecorationColor: '#d1d5db45',
+          textDecorationThickness: '1px',
+          display: 'flex',
+        }}>{manifest.Version}</div>
+      </div>
+      <div style={{
+        display: 'flex',
+        fontSize: '1.5rem',
+        width: '100%',
+        justifyContent: 'flex-start',
+    }}>
+        Manifest discovered: {displayDate(manifest.DiscoverDate_UTC)}
+      </div>
+    </div>
+    {manifest.DiffFiles.length === 0 ?
+      <div style={{
+        display: 'flex',
+        fontStyle: 'italic',
+        fontSize: '4.0rem',
+        marginTop: '340px',
+        justifyContent: 'center',
+        alignContent: 'center',
+      }}>No changes in this version</div> :
+      <div style={{
+        display: 'flex',
+        flexDirection: 'column'
+          }}>
+          <div style={{
+            display: 'flex',
+            flexDirection: 'row',
+            width: '100%',
+            justifyContent: 'center',
+          fontSize: '4.5rem',
+          marginTop: '160px',
+            marginBottom: '20px'
+            }}>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '50%' }}>
+            Added
+            <div style={{ display: 'flex', color: totalAdds > 0 ? '#15803d' : '' }}>
+              +{totalAdds.toLocaleString()}
+            </div>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column',alignItems: 'center', width: '50%' }}>
+            Modified
+            <div style={{ display: 'flex', color: totalMods > 0 ? '#93c5fd' : '' }}>
+              {totalMods.toLocaleString()}
+            </div>
+          </div>
+        </div>
+        <div style={{
+            display: 'flex',
+            flexDirection: 'row',
+            width: '100%',
+            justifyContent: 'center',
+          fontSize: '4.5rem',
+            marginBottom: '20px'
+            }}>
+          <div style={{ display: 'flex', flexDirection: 'column',alignItems: 'center', width: '50%' }}>
+            Unclassified
+            <div style={{ display: 'flex', color: totalUnclassified > 0 ? '#15803d' : '' }}>
+              +{totalUnclassified.toLocaleString()}
+            </div>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column',alignItems: 'center', width: '50%' }}>
+            Removed
+            <div style={{ display: 'flex', color: totalRemoves > 0 ? '#ef4444' : '' }}>
+              -{totalRemoves.toLocaleString()}
+            </div>
+          </div>
+        </div>
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column-reverse',
+          height: '280px'
+        }}>
+          {manifest.DiffFiles.map((file) => (isJunkDefinition(file.FileName) || file.FileStatus == FileStatus.Modified ? null :
+            <div key={file.FileName}
+              style={{
+              display: 'flex',
+              width: '100%',
+              backgroundColor: file.FileStatus === FileStatus.Added ? 'rgba(0, 255, 0, 0.3)' :
+                file.FileStatus === FileStatus.Removed ? 'rgba(255, 0, 0, 0.3)' : '',
+              fontSize: '0.8rem',
+              padding: '0.25rem',
+                alignSelf: 'flex-end',
+                justifyContent: 'center',
+              marginTop: '2px',
+              }}>
+              File {cleanDefinitionName(file.FileName)} was {file.FileStatus === FileStatus.Added ? "added" :
+                file.FileStatus === FileStatus.Removed ? "removed" : "modified"}
+            </div>
+          ))}
+          </div>
+      </div>}
+  </div>);
+}

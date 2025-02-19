@@ -1,7 +1,10 @@
-import { displayDiffTable } from "@/app/shared-methods";
+import { displayDiffTable, displayOgDiffTable } from "@/app/shared-methods";
 import { ManifestListItem } from "@/types/manifestListTypes";
 import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
 import { Metadata } from "next";
+import { ImageResponse } from "next/og";
+import path from "path";
+import fs from "fs";
 
 const s3 = new S3Client({
 	region: "manifest-report",
@@ -24,9 +27,29 @@ const manifestListObject = await s3.send(getManifestList);
 const manifestList = JSON.parse(await manifestListObject.Body!.transformToString());
 
 export async function generateStaticParams() {
-  return manifestList.map((post : ManifestListItem) => ({
-    version: post.VersionId,
-  }))
+	const paths = manifestList.map((post: ManifestListItem) => ({
+		version: post.VersionId,
+	}));
+
+	for (const param of paths) {
+		const outputDir = path.join(process.cwd(), 'public', 'og-images', 'manifests', `og-manifest-${param.version}.png`);
+
+		const manifest = getManifestFromList(param.version);
+		const image = new ImageResponse(
+			(displayOgDiffTable(manifest)),
+			{
+				width: 1080,
+				height: 1080
+			}
+		);
+
+		const imageBuffer = await image.arrayBuffer();
+
+		fs.mkdirSync(path.dirname(outputDir), { recursive: true });
+		fs.writeFileSync(outputDir, Buffer.from(imageBuffer));
+	}
+
+	return paths;
 }
 
 function getManifestFromList(version: string) : ManifestListItem {
@@ -58,7 +81,10 @@ export async function generateMetadata(
 			title: `Destiny 2 Manifest ${manifest.Version} information`,
 			releaseDate: getManifestFromList(version).DiscoverDate_UTC,
 			url: `https://site.manifest.report/manifests/${version}`,
-			description: ogDescription(manifest)
+			description: ogDescription(manifest),
+			images: [
+				`/og-images/manifests/og-manifest-${version}.png`
+			]
 		}
 	}
 }
