@@ -83,7 +83,7 @@ export async function generateMetadata(
 			url: `https://site.manifest.report/manifests/${version}`,
 			description: ogDescription(manifest),
 			images: [
-				`/og-images/manifests/og-manifest-${version}.png`
+				`https://site.manifest.report/og-images/manifests/og-manifest-${version}.png`
 			]
 		}
 	}
