@@ -35,8 +35,38 @@ export async function generateStaticParams() {
 		const outputDir = path.join(process.cwd(), 'public', 'og-images', 'manifests', `og-manifest-${param.version}.png`);
 
 		const manifest = getManifestFromList(param.version);
+
+		// const getSeasonDefinition = new GetObjectCommand({
+		// 	Bucket: "manifest-archive",
+		// 	Key: `versions/${param.version}/tables/DestinySeasonDefinition.json`,
+		// });
+
+		// const seasonDefinitionObject = await s3.send(getSeasonDefinition);
+
+		// const seasonDefinition = JSON.parse(await seasonDefinitionObject.Body!.transformToString());
+
+		// let latestSeason = null;
+
+		// const seasonHashes = Object.keys(seasonDefinition);
+
+		// for (const seasonHash of seasonHashes) {
+		// 	const season = seasonDefinition[seasonHash];
+		// 	if (season.startDate && season.endDate) {
+		// 		const startDate = new Date(season.startDate);
+		// 		const endDate = new Date(season.endDate);
+
+		// 		if (latestSeason === null && typeof season.backgroundImagePath !== 'undefined') {
+		// 			latestSeason = season;
+		// 		}
+
+		// 		if (latestSeason !== null && startDate > new Date(latestSeason.startDate) && endDate > new Date(latestSeason.endDate) && typeof season.backgroundImagePath !== 'undefined') {
+		// 			latestSeason = season;
+		// 		}
+		// 	}
+		// }
+
 		const image = new ImageResponse(
-			(displayOgDiffTable(manifest)),
+			(displayOgDiffTable(manifest/*, latestSeason*/)),
 			{
 				width: 1920,
 				height: 1080
@@ -74,6 +104,7 @@ export async function generateMetadata(
 	const { version } = await params;
 
 	const manifest = getManifestFromList(version);
+
 	return {
 		title: `Manifest version ${version} - Manifest.report`,
 		description: `Changes for version ${version}`,

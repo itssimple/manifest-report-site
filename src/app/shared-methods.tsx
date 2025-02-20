@@ -1,3 +1,4 @@
+//import { Season } from "@/types/destiny2/season";
 import { FileStatus, ManifestListItem } from "@/types/manifestListTypes";
 import Link from "next/link";
 
@@ -120,7 +121,7 @@ export function displayDiffTable(manifest: ManifestListItem, noLinks: boolean = 
   </div>);
 }
 
-export function displayOgDiffTable(manifest: ManifestListItem) {
+export function displayOgDiffTable(manifest: ManifestListItem/*, season: Season | null*/) {
 
   const totalAdds = manifest.DiffFiles.reduce((acc, file) => acc + file.Added, 0);
   const totalMods = manifest.DiffFiles.reduce((acc, file) => acc + file.Modified, 0);
@@ -132,10 +133,13 @@ export function displayOgDiffTable(manifest: ManifestListItem) {
     height: '1080px',
     display: 'flex',
     flexDirection: 'column',
-    backgroundColor: 'black',
+    backgroundColor: '#2c2c2c',
+    /*backgroundImage: season != null && typeof season.backgroundImagePath !== 'undefined' ? `url(https://www.bungie.net${season.backgroundImagePath})` : '',*/
+    backgroundSize: '1920px 1080px',
+    backgroundRepeat: 'no-repeat',
     color: 'white',
     padding: '0.5rem'
-  }} key={ manifest.VersionId } >
+  }} key={manifest.VersionId}>
     <div style={{
       display: 'flex',
       flexDirection: 'column'
@@ -143,7 +147,8 @@ export function displayOgDiffTable(manifest: ManifestListItem) {
       <div style={{
         display: 'flex',
         flexDirection: 'column',
-        fontSize: '4.5rem'
+        fontSize: '4.5rem',
+        marginLeft: '1.5rem',
       }}>
         <div style={{
           textDecoration: 'underline',
@@ -157,6 +162,7 @@ export function displayOgDiffTable(manifest: ManifestListItem) {
         fontSize: '2.5rem',
         width: '100%',
         justifyContent: 'flex-start',
+        marginLeft: '1.5rem',
     }}>
         Manifest discovered: {displayDate(manifest.DiscoverDate_UTC)}
       </div>
@@ -230,14 +236,13 @@ export function displayOgDiffTable(manifest: ManifestListItem) {
               width: '19.7%',
               backgroundColor: file.FileStatus === FileStatus.Added ? 'rgba(0, 255, 0, 0.3)' :
                 file.FileStatus === FileStatus.Removed ? 'rgba(255, 0, 0, 0.3)' : '',
-              fontSize: '0.8rem',
+              fontSize: '1.2rem',
               padding: '0.25rem',
                 justifyContent: 'center',
                 marginLeft: '0.3rem',
                 marginBottom: '0.3rem',
               }}>
-              File {cleanDefinitionName(file.FileName)} was {file.FileStatus === FileStatus.Added ? "added" :
-                file.FileStatus === FileStatus.Removed ? "removed" : "modified"}
+              {cleanDefinitionName(file.FileName)} {file.FileStatus === FileStatus.Added ? "added" : file.FileStatus === FileStatus.Removed ? "removed" : "modified"}
             </div>
           ))}
           </div>
