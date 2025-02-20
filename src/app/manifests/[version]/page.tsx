@@ -38,7 +38,7 @@ export async function generateStaticParams() {
 		const image = new ImageResponse(
 			(displayOgDiffTable(manifest)),
 			{
-				width: 1080,
+				width: 1920,
 				height: 1080
 			}
 		);
