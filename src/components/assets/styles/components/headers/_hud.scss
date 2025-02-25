@@ -1,0 +1,31 @@
+@use "../../variables";
+
+.hud {
+    &.headers {
+        font-family: variables.$header75Bold;
+        text-transform: uppercase;
+        font-size: 1.3rem;
+        @media (max-width: 486px) {
+            font-size: 1.2rem;
+        }
+    }
+
+    &.sub-header {
+        font-family: variables.$header65Medium;
+        font-size: 1.2rem;
+        letter-spacing: 0.02rem;
+        @media (max-width: 486px) {
+            font-size: 1.1rem;
+        }
+    }
+
+    &.description {
+        font-family: variables.$header56Italic;
+        font-size: 1.25rem;
+        font-weight: 700;
+        letter-spacing: 0.05rem;
+        @media (max-width: 486px) {
+            font-size: 1.1rem;
+        }
+    }
+}

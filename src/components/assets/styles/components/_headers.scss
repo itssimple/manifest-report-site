@@ -1,0 +1,17 @@
+@use "../variables";
+
+@forward "headers/active-text";
+@forward "headers/fui";
+@forward "headers/header";
+@forward "headers/hud";
+
+.spaced-header {
+    font-family: variables.$header55Roman;
+    font-size: 2rem;
+    text-transform: uppercase;
+    letter-spacing: 0.7rem;
+    margin-bottom: 0.5rem;
+    @media (max-width: 486px) {
+        font-size: 1.8rem;
+    }
+}

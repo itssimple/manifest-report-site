@@ -1,0 +1,36 @@
+@use "../../variables";
+
+.fui {
+    letter-spacing: 0.05rem;
+    font-size: 1.3rem;
+
+    font-family: variables.$header55Roman;
+
+    @media (max-width: 486px) {
+        font-size: 1.1rem;
+    }
+
+    &.body {
+        &.fiction {
+            font-family: variables.$header56Italic;
+            letter-spacing: 0.06rem;
+        }
+    }
+
+    &.sub-title {
+        text-transform: uppercase;
+        &.bold {
+            font-family: variables.$header65Medium;
+        }
+    }
+
+    &.numbers {
+        &.big {
+            font-family: variables.$header65Medium;
+            font-size: 3rem;
+            @media (max-width: 486px) {
+                font-size: 2.5rem;
+            }
+        }
+    }
+}

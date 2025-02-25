@@ -1,0 +1,100 @@
+$checkboxChecked: svg("./checked.svg");
+$checkboxUnchecked: svg("./unchecked.svg");
+
+.checkbox {
+  display: inline-block;
+  position: relative;
+  padding-left: 1.5rem;
+  margin-right: 1rem;
+  cursor: default;
+  user-select: none;
+
+  &.block {
+    display: block;
+  }
+
+  label {
+    display: inline-block;
+    cursor: pointer;
+    margin-bottom: unset;
+
+    &:hover input[type="checkbox"]:not(:disabled) ~ span::before {
+      background-color: #388348;
+    }
+
+    span {
+      cursor: pointer;
+      line-height: 1rem;
+      vertical-align: middle;
+    }
+  }
+
+  input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+
+    ~ {
+      span::before {
+        position: absolute;
+        top: 0.2rem;
+        left: 0;
+        height: 1rem;
+        width: 1rem;
+        background-image: $checkboxUnchecked;
+        background-size: cover;
+        content: " ";
+      }
+    }
+
+    &:checked {
+      ~ {
+        span::before {
+          background-image: $checkboxChecked;
+          background-size: cover;
+        }
+      }
+    }
+  }
+
+  &.leftCheck {
+    padding-right: 1.5rem;
+    padding-left: unset;
+
+    input[type="checkbox"] {
+      ~ {
+        span::before {
+          right: 0 !important;
+          left: unset;
+        }
+      }
+    }
+  }
+
+  @media (max-width: 486px) {
+    padding-left: 2.3rem;
+    font-size: 1.5rem;
+
+    label {
+      span {
+        line-height: 2rem;
+      }
+    }
+
+    input[type="checkbox"] {
+      ~ {
+        span::before {
+          top: 0;
+          height: 1.8rem;
+          width: 1.8rem;
+        }
+      }
+    }
+
+    &.leftCheck {
+      padding-right: 2.3rem;
+    }
+  }
+}
