@@ -7,131 +7,166 @@ import path from "path";
 import fs from "fs";
 
 const s3 = new S3Client({
-	region: "manifest-report",
-	credentials: {
-		accessKeyId: process.env.S3ACCESSKEY!,
-		secretAccessKey: process.env.S3SECRETKEY!
-	},
-	endpoint: process.env.S3ENDPOINT!,
-	forcePathStyle: true
-}
-);
+    region: "manifest-report",
+    credentials: {
+        accessKeyId: process.env.S3ACCESSKEY!,
+        secretAccessKey: process.env.S3SECRETKEY!,
+    },
+    endpoint: process.env.S3ENDPOINT!,
+    forcePathStyle: true,
+});
 
 const getManifestList = new GetObjectCommand({
-	Bucket: "manifest-archive",
-	Key: "list.json",
+    Bucket: "manifest-archive",
+    Key: "list.json",
 });
 
 const manifestListObject = await s3.send(getManifestList);
 
-const manifestList = JSON.parse(await manifestListObject.Body!.transformToString());
+const manifestList = JSON.parse(
+    await manifestListObject.Body!.transformToString()
+);
 
 export async function generateStaticParams() {
-	const paths = manifestList.map((post: ManifestListItem) => ({
-		version: post.VersionId,
-	}));
+    const paths = manifestList.map((post: ManifestListItem) => ({
+        version: post.VersionId,
+    }));
 
-	for (const param of paths) {
-		const outputDir = path.join(process.cwd(), 'public', 'og-images', 'manifests', `og-manifest-${param.version}.png`);
+    const font = path.join(
+        process.cwd(),
+        "src",
+        "components",
+        "assets",
+        "fonts",
+        "NeueHaasDisplayRoman.woff"
+    );
+    const fontBuffer = fs.readFileSync(font);
 
-		const manifest = getManifestFromList(param.version);
+    for (const param of paths) {
+        const outputDir = path.join(
+            process.cwd(),
+            "public",
+            "og-images",
+            "manifests",
+            `og-manifest-${param.version}.png`
+        );
 
-		// const getSeasonDefinition = new GetObjectCommand({
-		// 	Bucket: "manifest-archive",
-		// 	Key: `versions/${param.version}/tables/DestinySeasonDefinition.json`,
-		// });
+        const manifest = getManifestFromList(param.version);
 
-		// const seasonDefinitionObject = await s3.send(getSeasonDefinition);
+        // const getSeasonDefinition = new GetObjectCommand({
+        // 	Bucket: "manifest-archive",
+        // 	Key: `versions/${param.version}/tables/DestinySeasonDefinition.json`,
+        // });
 
-		// const seasonDefinition = JSON.parse(await seasonDefinitionObject.Body!.transformToString());
+        // const seasonDefinitionObject = await s3.send(getSeasonDefinition);
 
-		// let latestSeason = null;
+        // const seasonDefinition = JSON.parse(await seasonDefinitionObject.Body!.transformToString());
 
-		// const seasonHashes = Object.keys(seasonDefinition);
+        // let latestSeason = null;
 
-		// for (const seasonHash of seasonHashes) {
-		// 	const season = seasonDefinition[seasonHash];
-		// 	if (season.startDate && season.endDate) {
-		// 		const startDate = new Date(season.startDate);
-		// 		const endDate = new Date(season.endDate);
+        // const seasonHashes = Object.keys(seasonDefinition);
 
-		// 		if (latestSeason === null && typeof season.backgroundImagePath !== 'undefined') {
-		// 			latestSeason = season;
-		// 		}
+        // for (const seasonHash of seasonHashes) {
+        // 	const season = seasonDefinition[seasonHash];
+        // 	if (season.startDate && season.endDate) {
+        // 		const startDate = new Date(season.startDate);
+        // 		const endDate = new Date(season.endDate);
 
-		// 		if (latestSeason !== null && startDate > new Date(latestSeason.startDate) && endDate > new Date(latestSeason.endDate) && typeof season.backgroundImagePath !== 'undefined') {
-		// 			latestSeason = season;
-		// 		}
-		// 	}
-		// }
+        // 		if (latestSeason === null && typeof season.backgroundImagePath !== 'undefined') {
+        // 			latestSeason = season;
+        // 		}
 
-		const image = new ImageResponse(
-			(displayOgDiffTable(manifest/*, latestSeason*/)),
-			{
-				width: 1920,
-				height: 1080
-			}
-		);
+        // 		if (latestSeason !== null && startDate > new Date(latestSeason.startDate) && endDate > new Date(latestSeason.endDate) && typeof season.backgroundImagePath !== 'undefined') {
+        // 			latestSeason = season;
+        // 		}
+        // 	}
+        // }
 
-		const imageBuffer = await image.arrayBuffer();
+        const image = new ImageResponse(
+            displayOgDiffTable(manifest /*, latestSeason*/),
+            {
+                width: 1920,
+                height: 1080,
+                fonts: [
+                    {
+                        name: "Neue Haas Grotesk Display Pro 55 Roman",
+                        data: fontBuffer,
+                        style: "normal",
+                    },
+                ],
+            }
+        );
 
-		fs.mkdirSync(path.dirname(outputDir), { recursive: true });
-		fs.writeFileSync(outputDir, Buffer.from(imageBuffer));
-	}
+        const imageBuffer = await image.arrayBuffer();
 
-	return paths;
+        fs.mkdirSync(path.dirname(outputDir), { recursive: true });
+        fs.writeFileSync(outputDir, Buffer.from(imageBuffer));
+    }
+
+    return paths;
 }
 
-function getManifestFromList(version: string) : ManifestListItem {
-	return manifestList.find((post: ManifestListItem) => post.VersionId === version);
+function getManifestFromList(version: string): ManifestListItem {
+    return manifestList.find(
+        (post: ManifestListItem) => post.VersionId === version
+    );
 }
 
 function ogDescription(manifest: ManifestListItem) {
-	let totalChangedFiles = 0;
-	let totalChanges = 0;
-	manifest.DiffFiles.forEach((file) => {
-		totalChangedFiles++;
-		totalChanges += file.Added + file.Modified + file.Unclassified + file.Removed + file.Reclassified;
-	});
-	return `Manifest version ${manifest.Version} was discovered on ${manifest.DiscoverDate_UTC}
+    let totalChangedFiles = 0;
+    let totalChanges = 0;
+    manifest.DiffFiles.forEach((file) => {
+        totalChangedFiles++;
+        totalChanges +=
+            file.Added +
+            file.Modified +
+            file.Unclassified +
+            file.Removed +
+            file.Reclassified;
+    });
+    return `Manifest version ${manifest.Version} was discovered on ${manifest.DiscoverDate_UTC}
 	And has ${totalChangedFiles} files changed with a total of ${totalChanges} changes`;
 }
 
-export async function generateMetadata(
-	{ params }: { params: Promise<{ version: string }> },
-	//parent: ResolvingMetadata
-): Promise<Metadata> {
-	const { version } = await params;
+export async function generateMetadata({
+    params,
+}: {
+    params: Promise<{ version: string }>;
+}): //parent: ResolvingMetadata
+Promise<Metadata> {
+    const { version } = await params;
 
-	const manifest = getManifestFromList(version);
+    const manifest = getManifestFromList(version);
 
-	return {
-		title: `Manifest version ${version} - Manifest.report`,
-		description: `Changes for version ${version}`,
-		openGraph: {
-			title: `Destiny 2 Manifest ${manifest.Version} information`,
-			releaseDate: getManifestFromList(version).DiscoverDate_UTC,
-			url: `https://site.manifest.report/manifests/${version}`,
-			description: ogDescription(manifest),
-			images: [
-				`https://site.manifest.report/og-images/manifests/og-manifest-${version}.png`
-			]
-		}
-	}
+    return {
+        title: `Manifest version ${version} - Manifest.report`,
+        description: `Changes for version ${version}`,
+        openGraph: {
+            title: `Destiny 2 Manifest ${manifest.Version} information`,
+            releaseDate: getManifestFromList(version).DiscoverDate_UTC,
+            url: `https://site.manifest.report/manifests/${version}`,
+            description: ogDescription(manifest),
+            images: [
+                `https://site.manifest.report/og-images/manifests/og-manifest-${version}.png`,
+            ],
+        },
+    };
 }
 
 export default async function Page({
-	params,
+    params,
 }: {
-	params: Promise<{ version: string }>;
+    params: Promise<{ version: string }>;
 }) {
-	const { version } = await params;
-	const manifest = getManifestFromList(version);
-	return (
-		<main className="flex flex-col gap-4 row-start-2 items-start">
-			<h2 className="text-lg md:text-4xl">Manifest: {manifest.Version}</h2>
-			<hr />
-			{displayDiffTable(manifest)}
-		</main>
-	);
+    const { version } = await params;
+    const manifest = getManifestFromList(version);
+    return (
+        <main className="flex flex-col gap-4 row-start-2 items-start">
+            <h2 className="text-lg md:text-4xl header tooltip">
+                Manifest information: {manifest.Version}
+            </h2>
+            <hr className={"w-full"} />
+            {displayDiffTable(manifest)}
+        </main>
+    );
 }
