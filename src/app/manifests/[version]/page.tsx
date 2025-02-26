@@ -5,6 +5,7 @@ import { Metadata } from "next";
 import { ImageResponse } from "next/og";
 import path from "path";
 import fs from "fs";
+import Link from "next/link";
 
 const s3 = new S3Client({
     region: "manifest-report",
@@ -124,7 +125,7 @@ function ogDescription(manifest: ManifestListItem) {
             file.Removed +
             file.Reclassified;
     });
-    return `Manifest version ${manifest.Version} was discovered on ${manifest.DiscoverDate_UTC}
+    return `Discovered on ${manifest.DiscoverDate_UTC}
 	And has ${totalChangedFiles} files changed with a total of ${totalChanges} changes`;
 }
 
@@ -163,7 +164,13 @@ export default async function Page({
     return (
         <main className="flex flex-col gap-4 row-start-2 items-start">
             <h2 className="text-lg md:text-4xl header tooltip">
-                Manifest information: {manifest.Version}
+                <Link
+                    href="/manifests/"
+                    className="underline underline-offset-4 decoration-slate-800 hover:decoration-slate-300 transition-all duration-300"
+                >
+                    Manifests
+                </Link>{" "}
+                / {manifest.Version}
             </h2>
             <hr className={"w-full"} />
             {displayDiffTable(manifest)}

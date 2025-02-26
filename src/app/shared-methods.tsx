@@ -1,5 +1,9 @@
 //import { Season } from "@/types/destiny2/season";
-import { FileStatus, ManifestListItem } from "@/types/manifestListTypes";
+import {
+    DiffEntry,
+    FileStatus,
+    ManifestListItem,
+} from "@/types/manifestListTypes";
 import Link from "next/link";
 
 export function cleanDefinitionName(name: string) {
@@ -407,6 +411,35 @@ export function displayOgDiffTable(
                     </div>
                 </div>
             )}
+        </div>
+    );
+}
+
+export function displayDiffListItem(diffEntry: {
+    key: string;
+    definition: any;
+    diff: {
+        diff: DiffEntry[];
+    };
+}) {
+    let entryName = "No Name";
+    if (diffEntry.definition && diffEntry.definition.displayProperties) {
+        if (diffEntry.definition.displayProperties.name) {
+            entryName = diffEntry.definition.displayProperties.name;
+        } else {
+            if (diffEntry.definition.displayProperties.description) {
+                entryName = diffEntry.definition.displayProperties.description;
+            } else {
+                entryName = "<No Name or Description>";
+            }
+        }
+    }
+
+    return (
+        <div key={diffEntry.key}>
+            <h4 className="text-lg">
+                {entryName} ({diffEntry.key}) <i>(Also very WIP)</i>
+            </h4>
         </div>
     );
 }

@@ -1,4 +1,4 @@
-import { cleanDefinitionName } from "@/app/shared-methods";
+import { cleanDefinitionName, displayDiffListItem } from "@/app/shared-methods";
 import {
     DiffEntry,
     DiffEntryHolder,
@@ -7,6 +7,7 @@ import {
 } from "@/types/manifestListTypes";
 import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
 import { Metadata } from "next";
+import Link from "next/link";
 
 const s3 = new S3Client({
     region: "manifest-report",
@@ -124,11 +125,10 @@ export default async function ManifestVersion({
     // Get all objects that contains a diff with the path ending in redacted
 
     const addedObjects = diffObjects.filter((object) =>
-        object.diff.diff.every((diff: DiffEntry) => diff.op === "add")
-    );
-
-    const modifiedObjects = diffObjects.filter((object) =>
-        object.diff.diff.some((diff: DiffEntry) => diff.op === "edit")
+        object.diff.diff.every(
+            (diff: DiffEntry) =>
+                diff.op === "add" && diff.path.split("/").length === 2
+        )
     );
 
     const unClassifiedObjects = diffObjects.filter((object) =>
@@ -139,21 +139,39 @@ export default async function ManifestVersion({
     );
 
     const removedObjects = diffObjects.filter((object) =>
-        object.diff.diff.every((diff: DiffEntry) => diff.op === "del")
+        object.diff.diff.every(
+            (diff: DiffEntry) =>
+                diff.op === "del" && diff.path.split("/").length === 2
+        )
     );
 
-    console.log("Added", addedObjects);
-    console.log("Modified", modifiedObjects);
-    console.log("Unclassified", unClassifiedObjects);
-    console.log("Removed", removedObjects);
+    // Modified objects are the rest of the objects that are not added, unclassified or removed
+    const modifiedObjects = diffObjects.filter(
+        (object) =>
+            !addedObjects.includes(object) &&
+            !unClassifiedObjects.includes(object) &&
+            !removedObjects.includes(object)
+    );
 
     return (
         <main className="flex flex-col gap-4 row-start-2 items-start">
             <h2 className="text-lg md:text-4xl header tooltip">
-                Manifest information: {manifest.Version} / {definition}
+                <Link
+                    href="/manifests/"
+                    className="underline underline-offset-4 decoration-slate-800 hover:decoration-slate-300 transition-all duration-300"
+                >
+                    Manifests
+                </Link>{" "}
+                /{" "}
+                <Link
+                    href={`/manifests/${manifest.VersionId}`}
+                    className="underline underline-offset-4 decoration-slate-800 hover:decoration-slate-300 transition-all duration-300"
+                >
+                    {manifest.Version}
+                </Link>{" "}
+                / {definition}
             </h2>
             <hr className={"w-full"} />
-            {/* One column per type to fill the entire row, that tells you how many changes there were in a big white colour, and then under it in slightly more transparent text, what type it is */}
             <div className="flex flex-row gap-4">
                 <div className="flex flex-col gap-2">
                     <div
@@ -163,9 +181,11 @@ export default async function ManifestVersion({
                         }
                     >
                         {file.Added > 0 ? "+" : null}
-                        {file?.Added}
+                        {file?.Added.toLocaleString()}
                     </div>
-                    <div className="text-sm text-gray-50/50">Added</div>
+                    <div className="text-sm text-gray-50/50 text-right">
+                        Added
+                    </div>
                 </div>
                 <div className="flex flex-col gap-2">
                     <div
@@ -174,9 +194,11 @@ export default async function ManifestVersion({
                             (file.Modified > 0 ? " text-blue-300" : "")
                         }
                     >
-                        {file?.Modified}
+                        {file?.Modified.toLocaleString()}
                     </div>
-                    <div className="text-sm text-gray-50/50">Modified</div>
+                    <div className="text-sm text-gray-50/50 text-right">
+                        Modified
+                    </div>
                 </div>
                 <div className="flex flex-col gap-2">
                     <div
@@ -186,9 +208,11 @@ export default async function ManifestVersion({
                         }
                     >
                         {file.Unclassified > 0 ? "+" : null}
-                        {file?.Unclassified}
+                        {file?.Unclassified.toLocaleString()}
                     </div>
-                    <div className="text-sm text-gray-50/50">Unclassified</div>
+                    <div className="text-sm text-gray-50/50 text-right">
+                        Unclassified
+                    </div>
                 </div>
                 <div className="flex flex-col gap-2">
                     <div
@@ -198,17 +222,58 @@ export default async function ManifestVersion({
                         }
                     >
                         {file.Removed > 0 ? "-" : null}
-                        {file?.Removed}
+                        {file?.Removed.toLocaleString()}
                     </div>
                     <div className="text-sm text-gray-50/50">Removed</div>
                 </div>
                 <div className="flex flex-col gap-2">
                     <div className="text-2xl text-right">
-                        {file?.Reclassified}
+                        {file?.Reclassified.toLocaleString()}
                     </div>
-                    <div className="text-sm text-gray-50/50">Reclassified</div>
+                    <div className="text-sm text-gray-50/50 text-right">
+                        Reclassified
+                    </div>
                 </div>
             </div>
+            {/* Sections per type, if there are any changes, otherwise don't render the section */}
+            {addedObjects.length > 0 && (
+                <div className="flex flex-col gap-4">
+                    <h3 className="text-2xl underline underline-offset-4 decoration-slate-800">
+                        Added
+                    </h3>
+                    {addedObjects.map((object) => displayDiffListItem(object))}
+                </div>
+            )}
+            {modifiedObjects.length > 0 && (
+                <div className="flex flex-col gap-4">
+                    <h3 className="text-2xl underline underline-offset-4 decoration-slate-800">
+                        Modified
+                    </h3>
+                    {modifiedObjects.map((object) =>
+                        displayDiffListItem(object)
+                    )}
+                </div>
+            )}
+            {unClassifiedObjects.length > 0 && (
+                <div className="flex flex-col gap-4">
+                    <h3 className="text-2xl underline underline-offset-4 decoration-slate-800">
+                        Unclassified
+                    </h3>
+                    {unClassifiedObjects.map((object) =>
+                        displayDiffListItem(object)
+                    )}
+                </div>
+            )}
+            {removedObjects.length > 0 && (
+                <div className="flex flex-col gap-4">
+                    <h3 className="text-2xl underline underline-offset-4 decoration-slate-800">
+                        Removed
+                    </h3>
+                    {removedObjects.map((object) =>
+                        displayDiffListItem(object)
+                    )}
+                </div>
+            )}
         </main>
     );
 }

@@ -71,8 +71,7 @@ export default async function Page({
     return (
         <main className="flex flex-col gap-4 row-start-2 items-start">
             <h2 className="text-lg md:text-4xl header tooltip">
-                Manifest list: {manifestList.length} manifests stored - Page{" "}
-                {page}
+                Manifests / {manifestList.length} manifests stored - Page {page}
             </h2>
             <hr className="w-full" />
             {manifestListItems.map((manifest: ManifestListItem) =>
