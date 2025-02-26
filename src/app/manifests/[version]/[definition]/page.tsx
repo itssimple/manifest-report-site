@@ -82,6 +82,42 @@ Promise<Metadata> {
     };
 }
 
+async function getDefinition(version: string, definition: string) {
+    try {
+        const getManifestDefinition = new GetObjectCommand({
+            Bucket: "manifest-archive",
+            Key: `versions/${version}/tables/Destiny${definition}Definition.json`,
+        });
+
+        const manifestDefinition = await s3.send(getManifestDefinition);
+
+        const definitionData = JSON.parse(
+            await manifestDefinition.Body!.transformToString()
+        );
+        return definitionData;
+    } catch {
+        return null;
+    }
+}
+
+async function getDiffData(version: string, definition: string) {
+    try {
+        const getManifestDiff = new GetObjectCommand({
+            Bucket: "manifest-archive",
+            Key: `versions/${version}/diffFiles/Destiny${definition}Definition.json`,
+        });
+
+        const manifestDiff = await s3.send(getManifestDiff);
+
+        const diffData: DiffEntryHolder = JSON.parse(
+            await manifestDiff.Body!.transformToString()
+        );
+        return diffData;
+    } catch {
+        return null;
+    }
+}
+
 export default async function ManifestVersion({
     params,
 }: {
@@ -95,31 +131,18 @@ export default async function ManifestVersion({
     )!;
 
     // Load in the manifest definition file and the diff file
-    const getManifestDefinition = new GetObjectCommand({
-        Bucket: "manifest-archive",
-        Key: `versions/${version}/tables/Destiny${definition}Definition.json`,
-    });
+    const definitionData = await getDefinition(version, definition);
 
-    const getManifestDiff = new GetObjectCommand({
-        Bucket: "manifest-archive",
-        Key: `versions/${version}/diffFiles/Destiny${definition}Definition.json`,
-    });
-
-    const manifestDefinition = await s3.send(getManifestDefinition);
-    const manifestDiff = await s3.send(getManifestDiff);
-
-    const definitionData = JSON.parse(
-        await manifestDefinition.Body!.transformToString()
-    );
-
-    const diffData: DiffEntryHolder = JSON.parse(
-        await manifestDiff.Body!.transformToString()
+    const diffData: DiffEntryHolder | null = await getDiffData(
+        version,
+        definition
     );
     // Get all objects from definitionData based on the Object.keys from diffData
-    const diffObjects = Object.keys(diffData).map((key) => ({
+    const diffObjects = Object.keys(diffData!).map((key) => ({
         key,
-        definition: definitionData[key],
-        diff: diffData[parseInt(key)],
+        definition:
+            definitionData && definitionData[key] ? definitionData[key] : null,
+        diff: diffData![parseInt(key)],
     }));
 
     // Get all objects that contains a diff with the path ending in redacted
