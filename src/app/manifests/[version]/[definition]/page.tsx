@@ -260,7 +260,7 @@ export default async function ManifestVersion({
             </div>
             {/* Sections per type, if there are any changes, otherwise don't render the section */}
             {addedObjects.length > 0 && (
-                <div className="flex flex-col gap-4">
+                <div className="w-full flex flex-col gap-4">
                     <h3 className="text-2xl underline underline-offset-4 decoration-slate-800">
                         Added
                     </h3>
@@ -268,7 +268,7 @@ export default async function ManifestVersion({
                 </div>
             )}
             {modifiedObjects.length > 0 && (
-                <div className="flex flex-col gap-4">
+                <div className="w-full flex flex-col gap-4">
                     <h3 className="text-2xl underline underline-offset-4 decoration-slate-800">
                         Modified
                     </h3>
@@ -278,7 +278,7 @@ export default async function ManifestVersion({
                 </div>
             )}
             {unClassifiedObjects.length > 0 && (
-                <div className="flex flex-col gap-4">
+                <div className="w-full flex flex-col gap-4">
                     <h3 className="text-2xl underline underline-offset-4 decoration-slate-800">
                         Unclassified
                     </h3>
@@ -288,7 +288,7 @@ export default async function ManifestVersion({
                 </div>
             )}
             {removedObjects.length > 0 && (
-                <div className="flex flex-col gap-4">
+                <div className="w-full flex flex-col gap-4">
                     <h3 className="text-2xl underline underline-offset-4 decoration-slate-800">
                         Removed
                     </h3>

@@ -415,6 +415,18 @@ export function displayOgDiffTable(
     );
 }
 
+export function getNameFromDisplayProperties(displayProperties: any) {
+    if (displayProperties.name) {
+        return displayProperties.name;
+    } else {
+        if (displayProperties.description) {
+            return displayProperties.description;
+        } else {
+            return "<No Name or Description>";
+        }
+    }
+}
+
 export function displayDiffListItem(diffEntry: {
     key: string;
     definition: any;
@@ -423,23 +435,58 @@ export function displayDiffListItem(diffEntry: {
     };
 }) {
     let entryName = "No Name";
+    let icon = "/img/misc/missing_icon_d2.png";
+
     if (diffEntry.definition && diffEntry.definition.displayProperties) {
-        if (diffEntry.definition.displayProperties.name) {
-            entryName = diffEntry.definition.displayProperties.name;
-        } else {
-            if (diffEntry.definition.displayProperties.description) {
-                entryName = diffEntry.definition.displayProperties.description;
-            } else {
-                entryName = "<No Name or Description>";
+        entryName = getNameFromDisplayProperties(
+            diffEntry.definition.displayProperties
+        );
+
+        if (diffEntry.definition.displayProperties.icon) {
+            icon = diffEntry.definition.displayProperties.icon;
+        }
+    } else {
+        if (diffEntry.definition === null && diffEntry.diff.diff.length === 1) {
+            const removedEntryDiff = diffEntry.diff.diff[0];
+            if (removedEntryDiff.op === "del") {
+                const removedEntry = removedEntryDiff.old;
+                if (removedEntry.displayProperties) {
+                    entryName = getNameFromDisplayProperties(
+                        removedEntry.displayProperties
+                    );
+
+                    if (removedEntry.displayProperties.icon) {
+                        icon = removedEntry.displayProperties.icon;
+                    }
+                }
             }
         }
     }
 
     return (
-        <div key={diffEntry.key}>
+        <div
+            key={diffEntry.key}
+            className={"w-full bg-gray-900 p-5 rounded-lg mb-5"}
+        >
             <h4 className="text-lg">
-                {entryName} ({diffEntry.key}) <i>(Also very WIP)</i>
+                <img
+                    src={`https://www.bungie.net${icon}`}
+                    className={"w-10 h-10 inline-block mr-2"}
+                    alt=""
+                />
+                {entryName}
+                <div className={"text-base text-gray-400 float-right"}>
+                    {diffEntry.key}
+                </div>
             </h4>
+            <hr className={"w-full mt-2"} />
+            <pre
+                className={
+                    process.env.NODE_ENV !== "production" ? "hidden" : ""
+                }
+            >
+                <code>{JSON.stringify(diffEntry, null, 2)}</code>
+            </pre>
         </div>
     );
 }
