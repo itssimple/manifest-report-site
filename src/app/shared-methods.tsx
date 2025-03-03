@@ -482,7 +482,7 @@ export function displayDiffListItem(diffEntry: {
             <hr className={"w-full mt-2"} />
             <pre
                 className={
-                    process.env.NODE_ENV !== "production" ? "hidden" : ""
+                    process.env.NODE_ENV === "production" ? "hidden" : ""
                 }
             >
                 <code>{JSON.stringify(diffEntry, null, 2)}</code>
