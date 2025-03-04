@@ -428,13 +428,16 @@ export function getNameFromDisplayProperties(displayProperties: any) {
     }
 }
 
-export function displayDiffListItem(diffEntry: {
-    key: string;
-    definition: any;
-    diff: {
-        diff: DiffEntry[];
-    };
-}) {
+export function displayDiffListItem(
+    diffEntry: {
+        key: string;
+        definition: any;
+        diff: {
+            diff: DiffEntry[];
+        };
+    },
+    jsonDebug: boolean = false
+) {
     let entryName = "No Name";
     let icon = "/img/misc/missing_icon_d2.png";
 
@@ -482,7 +485,9 @@ export function displayDiffListItem(diffEntry: {
             </h4>
             <hr className={"w-full mt-2"} />
             <pre>
-                <code>{JSON.stringify(diffEntry, null, 2)}</code>
+                <code>
+                    {jsonDebug ? JSON.stringify(diffEntry, null, 2) : null}
+                </code>
             </pre>
         </div>
     );

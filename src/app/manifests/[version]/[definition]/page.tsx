@@ -176,6 +176,13 @@ export default async function ManifestVersion({
             !removedObjects.includes(object)
     );
 
+    const tooBigManifestsForJson = [
+        "b026c2b3-2c91-4357-824f-59956ac1256a",
+        "879f9b9c-44de-4415-9c02-47efba8b8578",
+    ];
+
+    const jsonDebug = !tooBigManifestsForJson.includes(version);
+
     return (
         <main className="flex flex-col gap-4 row-start-2 items-start">
             <h2 className="text-lg md:text-4xl header tooltip">
@@ -264,7 +271,9 @@ export default async function ManifestVersion({
                     <h3 className="text-2xl underline underline-offset-4 decoration-slate-800">
                         Added
                     </h3>
-                    {addedObjects.map((object) => displayDiffListItem(object))}
+                    {addedObjects.map((object) =>
+                        displayDiffListItem(object, jsonDebug)
+                    )}
                 </div>
             )}
             {modifiedObjects.length > 0 && (
@@ -273,7 +282,7 @@ export default async function ManifestVersion({
                         Modified
                     </h3>
                     {modifiedObjects.map((object) =>
-                        displayDiffListItem(object)
+                        displayDiffListItem(object, jsonDebug)
                     )}
                 </div>
             )}
@@ -283,7 +292,7 @@ export default async function ManifestVersion({
                         Unclassified
                     </h3>
                     {unClassifiedObjects.map((object) =>
-                        displayDiffListItem(object)
+                        displayDiffListItem(object, jsonDebug)
                     )}
                 </div>
             )}
@@ -293,7 +302,7 @@ export default async function ManifestVersion({
                         Removed
                     </h3>
                     {removedObjects.map((object) =>
-                        displayDiffListItem(object)
+                        displayDiffListItem(object, jsonDebug)
                     )}
                 </div>
             )}
