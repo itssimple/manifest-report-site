@@ -4,6 +4,7 @@ import {
     FileStatus,
     ManifestListItem,
 } from "@/types/manifestListTypes";
+import Image from "next/image";
 import Link from "next/link";
 
 export function cleanDefinitionName(name: string) {
@@ -469,7 +470,7 @@ export function displayDiffListItem(diffEntry: {
             className={"w-full bg-gray-900 p-5 rounded-lg mb-5"}
         >
             <h4 className="text-lg">
-                <img
+                <Image
                     src={`https://www.bungie.net${icon}`}
                     className={"w-10 h-10 inline-block mr-2"}
                     alt=""
@@ -480,11 +481,7 @@ export function displayDiffListItem(diffEntry: {
                 </div>
             </h4>
             <hr className={"w-full mt-2"} />
-            <pre
-                className={
-                    process.env.NODE_ENV === "production" ? "hidden" : ""
-                }
-            >
+            <pre>
                 <code>{JSON.stringify(diffEntry, null, 2)}</code>
             </pre>
         </div>
