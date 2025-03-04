@@ -24,6 +24,8 @@ const getManifestList = new GetObjectCommand({
     Key: "list.json",
 });
 
+const JSON_DEBUG = process.env.JSONDEBUG === "true";
+
 const manifestListObject = await s3.send(getManifestList);
 
 const manifestList = JSON.parse(
@@ -179,9 +181,10 @@ export default async function ManifestVersion({
     const tooBigManifestsForJson = [
         "b026c2b3-2c91-4357-824f-59956ac1256a",
         "879f9b9c-44de-4415-9c02-47efba8b8578",
+        "b236dc4b-cff6-4539-9e09-1525582fbe82",
     ];
 
-    const jsonDebug = !tooBigManifestsForJson.includes(version);
+    const jsonDebug = JSON_DEBUG && !tooBigManifestsForJson.includes(version);
 
     return (
         <main className="flex flex-col gap-4 row-start-2 items-start">

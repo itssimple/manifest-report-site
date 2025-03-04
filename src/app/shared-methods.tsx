@@ -477,6 +477,8 @@ export function displayDiffListItem(
                     src={`https://www.bungie.net${icon}`}
                     className={"w-10 h-10 inline-block mr-2"}
                     alt=""
+                    width={"40"}
+                    height={"40"}
                 />
                 {entryName}
                 <div className={"text-base text-gray-400 float-right"}>
