@@ -97,3 +97,8 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+      - name: Push notification to Discord
+        run: |
+            curl -H "Content-Type: multipart/form-data" \
+            -F "payload_json={\"username\": \"Manifest.report Update\", \"content\": \"A new manifest from Destiny 2 has been spotted\"}" \
+            ${{ secrets.DISCORD_WEBHOOK }}
