@@ -13,7 +13,7 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - name: Update git on server
-              uses: appleboy/ssh-action@0.1.7
+              uses: appleboy/ssh-action@v1.2.2
               with:
                   host: ${{ secrets.SERVER_IP }}
                   username: ${{ secrets.SSH_USER }}
