@@ -1,0 +1,27 @@
+name: Update server data
+on:
+    push:
+        branches: [main]
+    workflow_dispatch:
+
+concurrency:
+    group: "server-data"
+    cancel-in-progress: false
+
+jobs:
+    update-data:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Update git on server
+              uses: appleboy/ssh-action@0.1.7
+              with:
+                  host: ${{ secrets.SERVER_IP }}
+                  username: ${{ secrets.SSH_USER }}
+                  key: ${{ secrets.SSH_KEY }}
+                  script: |
+                      cd /hotelroot/manifest-report-site
+                      git fetch
+                      git pull origin main
+                      npm install
+                      npm run build
+                      systemctl restart manifest-report-site
