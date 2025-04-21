@@ -4,6 +4,8 @@ import { ManifestListItem } from "@/types/manifestListTypes";
 import { Metadata } from "next";
 import ManifestS3Client from "@/s3ApiClient";
 
+export const revalidate = 60;
+
 const s3 = new ManifestS3Client();
 
 const manifestList = await s3.getManifestList();

@@ -10,6 +10,8 @@ import {
 import { Metadata } from "next";
 import Link from "next/link";
 
+export const revalidate = 3600;
+
 const debugTimer: DebugTimer = new DebugTimer();
 
 const s3 = new ManifestS3Client();

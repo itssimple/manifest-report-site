@@ -4,6 +4,8 @@ import { displayDiffTable } from "../shared-methods";
 import { Pager } from "../../components/Pager";
 import ManifestS3Client from "@/s3ApiClient";
 
+export const revalidate = 60;
+
 const s3 = new ManifestS3Client();
 
 export const metadata: Metadata = {
