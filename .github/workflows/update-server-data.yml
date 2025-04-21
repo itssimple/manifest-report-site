@@ -11,6 +11,10 @@ concurrency:
 jobs:
     update-data:
         runs-on: ubuntu-latest
+        env:
+            S3ENDPOINT: ${{ secrets.S3ENDPOINT }}
+            S3ACCESSKEY: ${{ secrets.S3ACCESSKEY }}
+            S3SECRETKEY: ${{ secrets.S3SECRETKEY }}
         steps:
             - name: Update git on server
               uses: appleboy/ssh-action@v1.2.2
@@ -18,6 +22,7 @@ jobs:
                   host: ${{ secrets.SERVER_IP }}
                   username: ${{ secrets.SSH_USER }}
                   key: ${{ secrets.SSH_KEY }}
+                  envs: S3ENDPOINT,S3ACCESSKEY,S3SECRETKEY
                   script: |
                       cd /hotelroot/manifest-report-site
                       git fetch
