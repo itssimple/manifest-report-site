@@ -1,29 +1,12 @@
 import { Pager } from "@/components/Pager";
 import { displayDiffTable } from "@/app/shared-methods";
 import { ManifestListItem } from "@/types/manifestListTypes";
-import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
 import { Metadata } from "next";
+import ManifestS3Client from "@/s3ApiClient";
 
-const s3 = new S3Client({
-    region: "manifest-report",
-    credentials: {
-        accessKeyId: process.env.S3ACCESSKEY!,
-        secretAccessKey: process.env.S3SECRETKEY!,
-    },
-    endpoint: process.env.S3ENDPOINT!,
-    forcePathStyle: true,
-});
+const s3 = new ManifestS3Client();
 
-const getManifestList = new GetObjectCommand({
-    Bucket: "manifest-archive",
-    Key: "list.json",
-});
-
-const manifestListObject = await s3.send(getManifestList);
-
-const manifestList = JSON.parse(
-    await manifestListObject.Body!.transformToString()
-);
+const manifestList = await s3.getManifestList();
 
 manifestList.sort((a: ManifestListItem, b: ManifestListItem) => {
     return (

@@ -1,36 +1,21 @@
+import { DebugTimer } from "@/app/debugTimer";
 import { cleanDefinitionName, displayDiffListItem } from "@/app/shared-methods";
+import ManifestS3Client from "@/s3ApiClient";
 import {
     DiffEntry,
     DiffEntryHolder,
     DiffFile,
     ManifestListItem,
 } from "@/types/manifestListTypes";
-import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
 import { Metadata } from "next";
 import Link from "next/link";
 
-const s3 = new S3Client({
-    region: "manifest-report",
-    credentials: {
-        accessKeyId: process.env.S3ACCESSKEY!,
-        secretAccessKey: process.env.S3SECRETKEY!,
-    },
-    endpoint: process.env.S3ENDPOINT!,
-    forcePathStyle: true,
-});
+const debugTimer: DebugTimer = new DebugTimer();
 
-const getManifestList = new GetObjectCommand({
-    Bucket: "manifest-archive",
-    Key: "list.json",
-});
+const s3 = new ManifestS3Client();
+const manifestList = await s3.getManifestList();
 
 const JSON_DEBUG = process.env.JSONDEBUG === "true";
-
-const manifestListObject = await s3.send(getManifestList);
-
-const manifestList = JSON.parse(
-    await manifestListObject.Body!.transformToString()
-);
 
 export async function generateStaticParams() {
     return manifestList.flatMap((post: ManifestListItem) =>
@@ -41,13 +26,8 @@ export async function generateStaticParams() {
     );
 }
 
-function getManifestFromList(version: string): ManifestListItem {
-    return manifestList.find(
-        (post: ManifestListItem) => post.VersionId === version
-    );
-}
-
 function ogDescription(manifest: ManifestListItem) {
+    const ogTimer = debugTimer.start("ogDescription");
     let totalChangedFiles = 0;
     let totalChanges = 0;
     manifest.DiffFiles.forEach((file) => {
@@ -59,6 +39,7 @@ function ogDescription(manifest: ManifestListItem) {
             file.Removed +
             file.Reclassified;
     });
+    debugTimer.stop(ogTimer);
     return `Manifest version ${manifest.Version} was discovered on ${manifest.DiscoverDate_UTC}
 	And has ${totalChangedFiles} files changed with a total of ${totalChanges} changes`;
 }
@@ -69,55 +50,21 @@ export async function generateMetadata({
     params: Promise<{ version: string; definition: string }>;
 }): //parent: ResolvingMetadata
 Promise<Metadata> {
+    const metadataTimer = debugTimer.start("generateMetadata");
     const { version, definition } = await params;
 
-    const manifest = getManifestFromList(version);
+    const manifest = await s3.getManifestFromList(version);
+    debugTimer.stop(metadataTimer);
     return {
         title: `Manifest version ${version}, definition ${definition} - Manifest.report`,
         description: `Changes for definition ${definition} in version ${version}`,
         openGraph: {
             title: `Destiny 2 Manifest ${manifest.Version}/${definition} information`,
-            releaseDate: getManifestFromList(version).DiscoverDate_UTC,
+            releaseDate: manifest.DiscoverDate_UTC,
             url: `https://site.manifest.report/manifests/${version}/${definition}`,
             description: ogDescription(manifest),
         },
     };
-}
-
-async function getDefinition(version: string, definition: string) {
-    try {
-        const getManifestDefinition = new GetObjectCommand({
-            Bucket: "manifest-archive",
-            Key: `versions/${version}/tables/Destiny${definition}Definition.json`,
-        });
-
-        const manifestDefinition = await s3.send(getManifestDefinition);
-
-        const definitionData = JSON.parse(
-            await manifestDefinition.Body!.transformToString()
-        );
-        return definitionData;
-    } catch {
-        return null;
-    }
-}
-
-async function getDiffData(version: string, definition: string) {
-    try {
-        const getManifestDiff = new GetObjectCommand({
-            Bucket: "manifest-archive",
-            Key: `versions/${version}/diffFiles/Destiny${definition}Definition.json`,
-        });
-
-        const manifestDiff = await s3.send(getManifestDiff);
-
-        const diffData: DiffEntryHolder = JSON.parse(
-            await manifestDiff.Body!.transformToString()
-        );
-        return diffData;
-    } catch {
-        return null;
-    }
 }
 
 export default async function ManifestVersion({
@@ -125,20 +72,27 @@ export default async function ManifestVersion({
 }: {
     params: Promise<{ version: string; definition: string }>;
 }) {
+    const timer = debugTimer.start("ManifestVersion");
     const { version, definition } = await params;
 
-    const manifest = getManifestFromList(version);
+    const manifest = await s3.getManifestFromList(version);
     const file = manifest.DiffFiles.find(
         (file: DiffFile) => cleanDefinitionName(file.FileName) === definition
     )!;
 
     // Load in the manifest definition file and the diff file
-    const definitionData = await getDefinition(version, definition);
+    const definitionTimer = debugTimer.start("getDefinition");
+    const definitionData = await s3.getDefinition(version, definition);
+    debugTimer.stop(definitionTimer);
 
-    const diffData: DiffEntryHolder | null = await getDiffData(
+    const diffTimer = debugTimer.start("getDiffData");
+    const diffData: DiffEntryHolder | null = await s3.getDiffData(
         version,
         definition
     );
+    debugTimer.stop(diffTimer);
+
+    const buildObjectsTimer = debugTimer.start("buildObjects");
     // Get all objects from definitionData based on the Object.keys from diffData
     const diffObjects = Object.keys(diffData!).map((key) => ({
         key,
@@ -184,9 +138,11 @@ export default async function ManifestVersion({
         "b236dc4b-cff6-4539-9e09-1525582fbe82",
     ];
 
+    debugTimer.stop(buildObjectsTimer);
+
     const jsonDebug = JSON_DEBUG && !tooBigManifestsForJson.includes(version);
 
-    return (
+    const returnHtml = (
         <main className="flex flex-col gap-4 row-start-2 items-start">
             <h2 className="text-lg md:text-4xl header tooltip">
                 <Link
@@ -217,7 +173,11 @@ export default async function ManifestVersion({
                         {file?.Added.toLocaleString()}
                     </div>
                     <div className="text-sm text-gray-50/50 text-right">
-                        Added
+                        {file.Added > 0 ? (
+                            <Link href="#added">Added</Link>
+                        ) : (
+                            "Added"
+                        )}
                     </div>
                 </div>
                 <div className="flex flex-col gap-2">
@@ -230,7 +190,11 @@ export default async function ManifestVersion({
                         {file?.Modified.toLocaleString()}
                     </div>
                     <div className="text-sm text-gray-50/50 text-right">
-                        Modified
+                        {file.Modified > 0 ? (
+                            <Link href="#modified">Modified</Link>
+                        ) : (
+                            "Modified"
+                        )}
                     </div>
                 </div>
                 <div className="flex flex-col gap-2">
@@ -244,7 +208,11 @@ export default async function ManifestVersion({
                         {file?.Unclassified.toLocaleString()}
                     </div>
                     <div className="text-sm text-gray-50/50 text-right">
-                        Unclassified
+                        {file.Unclassified > 0 ? (
+                            <Link href="#unclassified">Unclassified</Link>
+                        ) : (
+                            "Unclassified"
+                        )}
                     </div>
                 </div>
                 <div className="flex flex-col gap-2">
@@ -257,21 +225,34 @@ export default async function ManifestVersion({
                         {file.Removed > 0 ? "-" : null}
                         {file?.Removed.toLocaleString()}
                     </div>
-                    <div className="text-sm text-gray-50/50">Removed</div>
+                    <div className="text-sm text-gray-50/50">
+                        {file.Removed > 0 ? (
+                            <Link href="#removed">Removed</Link>
+                        ) : (
+                            "Removed"
+                        )}
+                    </div>
                 </div>
                 <div className="flex flex-col gap-2">
                     <div className="text-2xl text-right">
                         {file?.Reclassified.toLocaleString()}
                     </div>
                     <div className="text-sm text-gray-50/50 text-right">
-                        Reclassified
+                        {file.Reclassified > 0 ? (
+                            <Link href="#reclassified">Reclassified</Link>
+                        ) : (
+                            "Reclassified"
+                        )}
                     </div>
                 </div>
             </div>
             {/* Sections per type, if there are any changes, otherwise don't render the section */}
             {addedObjects.length > 0 && (
                 <div className="w-full flex flex-col gap-4">
-                    <h3 className="text-2xl underline underline-offset-4 decoration-slate-800">
+                    <h3
+                        className="text-2xl underline underline-offset-4 decoration-slate-800"
+                        id="added"
+                    >
                         Added
                     </h3>
                     {addedObjects.map((object) =>
@@ -281,7 +262,10 @@ export default async function ManifestVersion({
             )}
             {modifiedObjects.length > 0 && (
                 <div className="w-full flex flex-col gap-4">
-                    <h3 className="text-2xl underline underline-offset-4 decoration-slate-800">
+                    <h3
+                        className="text-2xl underline underline-offset-4 decoration-slate-800"
+                        id="modified"
+                    >
                         Modified
                     </h3>
                     {modifiedObjects.map((object) =>
@@ -291,7 +275,10 @@ export default async function ManifestVersion({
             )}
             {unClassifiedObjects.length > 0 && (
                 <div className="w-full flex flex-col gap-4">
-                    <h3 className="text-2xl underline underline-offset-4 decoration-slate-800">
+                    <h3
+                        className="text-2xl underline underline-offset-4 decoration-slate-800"
+                        id="unclassified"
+                    >
                         Unclassified
                     </h3>
                     {unClassifiedObjects.map((object) =>
@@ -301,7 +288,10 @@ export default async function ManifestVersion({
             )}
             {removedObjects.length > 0 && (
                 <div className="w-full flex flex-col gap-4">
-                    <h3 className="text-2xl underline underline-offset-4 decoration-slate-800">
+                    <h3
+                        className="text-2xl underline underline-offset-4 decoration-slate-800"
+                        id="removed"
+                    >
                         Removed
                     </h3>
                     {removedObjects.map((object) =>
@@ -310,5 +300,14 @@ export default async function ManifestVersion({
                 </div>
             )}
         </main>
+    );
+
+    debugTimer.stop(timer);
+
+    return (
+        <>
+            {returnHtml}
+            {debugTimer.toElements()}
+        </>
     );
 }

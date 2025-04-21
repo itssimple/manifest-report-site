@@ -5,7 +5,7 @@ const nextConfig: NextConfig = {
     /* config options here */
     staticPageGenerationTimeout: 3600,
     images: {
-        unoptimized: false, //process.env.JSONDEBUG === "true",
+        unoptimized: process.env.JSONDEBUG === "true",
         remotePatterns: [
             {
                 protocol: "https",
