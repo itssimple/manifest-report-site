@@ -8,10 +8,8 @@ class ManifestS3Client {
 
     private manifestList: ManifestListItem[] = [];
 
-    private rootCacheFolder: string = path.join(
-        process.cwd(),
-        ".manifest-cache"
-    );
+    private rootCacheFolder: string =
+        process.env.CACHEFOLDER ?? path.join(process.cwd(), ".manifest-cache");
 
     constructor() {
         this.s3Client = new S3Client({
