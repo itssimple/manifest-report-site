@@ -5,6 +5,8 @@ const s3 = new ManifestS3Client();
 
 const JSON_DEBUG = process.env.JSONDEBUG === "true";
 
+export const revalidate = 31536000;
+
 export default async function DiffPage({
     params,
 }: {
