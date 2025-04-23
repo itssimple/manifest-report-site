@@ -429,6 +429,7 @@ export function getNameFromDisplayProperties(displayProperties: any) {
 }
 
 export function displayDiffListItem(
+    definition: string,
     diffEntry: {
         key: string;
         definition: any;
@@ -480,7 +481,9 @@ export function displayDiffListItem(
                     width={"40"}
                     height={"40"}
                 />
-                {entryName}
+                <Link href={`./${definition}/${diffEntry.key}`}>
+                    {entryName}
+                </Link>
                 <div className={"text-base text-gray-400 float-right"}>
                     {diffEntry.key}
                 </div>

@@ -118,6 +118,10 @@ class ManifestS3Client {
     }
 
     async getManifestFromList(version: string): Promise<ManifestListItem> {
+        if (this.manifestList.length === 0) {
+            await this.getManifestList();
+        }
+
         return this.manifestList.find(
             (post: ManifestListItem) => post.VersionId === version
         )!;

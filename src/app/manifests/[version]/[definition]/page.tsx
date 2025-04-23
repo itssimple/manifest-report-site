@@ -256,7 +256,7 @@ export default async function ManifestVersion({
                         Added
                     </h3>
                     {addedObjects.map((object) =>
-                        displayDiffListItem(object, jsonDebug)
+                        displayDiffListItem(definition, object, jsonDebug)
                     )}
                 </div>
             )}
@@ -269,7 +269,7 @@ export default async function ManifestVersion({
                         Modified
                     </h3>
                     {modifiedObjects.map((object) =>
-                        displayDiffListItem(object, jsonDebug)
+                        displayDiffListItem(definition, object, jsonDebug)
                     )}
                 </div>
             )}
@@ -282,7 +282,7 @@ export default async function ManifestVersion({
                         Unclassified
                     </h3>
                     {unClassifiedObjects.map((object) =>
-                        displayDiffListItem(object, jsonDebug)
+                        displayDiffListItem(definition, object, jsonDebug)
                     )}
                 </div>
             )}
@@ -295,7 +295,7 @@ export default async function ManifestVersion({
                         Removed
                     </h3>
                     {removedObjects.map((object) =>
-                        displayDiffListItem(object, jsonDebug)
+                        displayDiffListItem(definition, object, jsonDebug)
                     )}
                 </div>
             )}
