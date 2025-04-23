@@ -8,8 +8,6 @@ import Link from "next/link";
 import ManifestS3Client from "@/s3ApiClient";
 import { DebugTimer } from "@/app/debugTimer";
 
-export const revalidate = 3600;
-
 const s3 = new ManifestS3Client();
 const manifestList = await s3.getManifestList();
 

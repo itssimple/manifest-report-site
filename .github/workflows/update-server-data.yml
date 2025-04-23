@@ -2,6 +2,8 @@ name: Update server data
 on:
     push:
         branches: [main]
+    repository_dispatch:
+        types: [deploy]
     workflow_dispatch:
 
 concurrency:
@@ -16,18 +18,89 @@ jobs:
             S3ACCESSKEY: ${{ secrets.S3ACCESSKEY }}
             S3SECRETKEY: ${{ secrets.S3SECRETKEY }}
             CACHEFOLDER: ${{ secrets.CACHE_FOLDER }}
+            DEPLOY_VERSION: ${{ vars.DEPLOY_ENV }}
         steps:
-            - name: Update git on server
+            - name: Update server
               uses: appleboy/ssh-action@v1.2.2
               with:
                   host: ${{ secrets.SERVER_IP }}
                   username: ${{ secrets.SSH_USER }}
                   key: ${{ secrets.SSH_KEY }}
-                  envs: S3ENDPOINT,S3ACCESSKEY,S3SECRETKEY
+                  envs: S3ENDPOINT,S3ACCESSKEY,S3SECRETKEY,CACHEFOLDER,DEPLOY_VERSION
+                  command_timeout: 1h
                   script: |
-                      cd /hotelroot/manifest-report-site
+                      cd /hotelroot/manifest-${{ vars.DEPLOY_ENV }}
                       git fetch
                       git pull origin main
                       npm install
                       npm run build
-                      systemctl restart manifest-report-site
+                      systemctl restart manifest-${{ vars.DEPLOY_ENV }}
+                      sleep 5
+
+                      PORT=${{ vars.DEPLOY_ENV == 'green' && '3001' || '3002' }}
+                      RETRIES=10
+                      SLEEP_SECONDS=1
+
+                      for((i=1; i<=RETRIES; i++)); do
+                        STATUS_CODE=$(curl -I -X GET -s -o /dev/null -w "%{http_code}" http://localhost:$PORT)
+                        echo "Attempt $i: Status code: $STATUS_CODE"
+                        if [ "$STATUS_CODE" -eq 200 ]; then
+                          echo "Manifest server is up and running!"
+                          break
+                        fi
+
+                        if [ $i -eq $RETRIES ]; then
+                          echo "Manifest server failed to start after $RETRIES attempts."
+                          exit 1
+                        fi
+                        sleep $SLEEP_SECONDS
+                      done
+
+                      cat << EOF | sudo tee /etc/nginx/sites-enabled/default > /dev/null
+                      server {
+                        listen 443 ssl http2;
+                        listen [::]:443 ssl http2;
+
+                        access_log /var/log/nginx/manifest-report.access.log;
+                        error_log  /var/log/nginx/manifest-report.error.log;
+
+                        location / {
+                          proxy_pass      http://localhost:${{ vars.DEPLOY_ENV == 'green' && '3001' || '3002' }};
+                          proxy_cache_bypass $http_upgrade;
+
+                          proxy_set_header        Upgrade $http_upgrade;
+                          proxy_set_header        Connection keep-alive;
+                          proxy_set_header Host $host;
+                          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                          proxy_set_header X-Forwarded-Proto $scheme;
+                        }
+
+                        server_name site.manifest.report;
+                      }
+                      EOF
+                      systemctl reload nginx
+
+            - name: Push success notification to Discord
+              if: success()
+              run: |
+                  curl -H "Content-Type: multipart/form-data" \
+                  -F "payload_json={\"username\": \"Manifest.report Update\", \"content\": \"A new version (${{ vars.DEPLOY_ENV }}) of the manifest-site has been uploaded\"}" \
+                  ${{ secrets.DISCORD_WEBHOOK }}
+
+            - name: Push deployment notification to Discord
+              if: github.event_name == 'repository_dispatch' && github.event.action == 'deploy'
+              run: |
+                  curl -H "Content-Type: multipart/form-data" \
+                  -F "payload_json={\"username\": \"Manifest.report Update\", \"content\": \"A new manifest version has been uploaded\"}" \
+                  ${{ secrets.DISCORD_WEBHOOK }}
+
+            - name: Push failure notification to Discord
+              if: failure()
+              run: |
+                  curl -H "Content-Type: multipart/form-data" \
+                  -F "payload_json={\"username\": \"Manifest.report Update\", \"content\": \"A new version (${{ vars.DEPLOY_ENV }}) of the manifest-site has failed to upload\"}" \
+                  ${{ secrets.DISCORD_WEBHOOK }}
+
+            - name: Change deploy env for next deploy
+              if: success()
+              run: gh variable set DEPLOY_ENV ${{ vars.DEPLOY_ENV == 'green' && 'blue' || 'green' }}
