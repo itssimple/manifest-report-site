@@ -110,4 +110,9 @@ jobs:
 
             - name: Change deploy env for next deploy
               if: success()
-              run: gh variable set DEPLOY_ENV --body "${{ vars.DEPLOY_ENV == 'green' && 'blue' || 'green' }}"
+              uses: mmoyaferrer/set-github-variable@v1.0.0
+              with:
+                  name: "DEPLOY_ENV"
+                  value: "${{ vars.DEPLOY_ENV == 'green' && 'blue' || 'green' }}"
+                  repository: "itssimple/manifest-report-site"
+                  token: ${{ secrets.VARIABLE_TOKEN }}
