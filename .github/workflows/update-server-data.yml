@@ -10,8 +10,6 @@ concurrency:
     group: "server-data"
     cancel-in-progress: false
 
-permissions: write-all
-
 jobs:
     update-data:
         runs-on: ubuntu-latest
@@ -21,7 +19,7 @@ jobs:
             S3SECRETKEY: ${{ secrets.S3SECRETKEY }}
             CACHEFOLDER: ${{ secrets.CACHE_FOLDER }}
             DEPLOY_VERSION: ${{ vars.DEPLOY_ENV }}
-            GH_TOKEN: ${{ github.token }}
+            GH_TOKEN: ${{ secrets.VARIABLE_TOKEN }}
         steps:
             - name: Checkout repository
               uses: actions/checkout@v4
