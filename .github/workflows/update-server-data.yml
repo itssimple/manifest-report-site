@@ -21,6 +21,10 @@ jobs:
             DEPLOY_VERSION: ${{ vars.DEPLOY_ENV }}
             GH_TOKEN: ${{ github.token }}
         steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+              with:
+                  fetch-depth: 1
             - name: Update server
               uses: appleboy/ssh-action@v1.2.2
               with:
