@@ -19,6 +19,7 @@ jobs:
             S3SECRETKEY: ${{ secrets.S3SECRETKEY }}
             CACHEFOLDER: ${{ secrets.CACHE_FOLDER }}
             DEPLOY_VERSION: ${{ vars.DEPLOY_ENV }}
+            GH_TOKEN: ${{ github.token }}
         steps:
             - name: Update server
               uses: appleboy/ssh-action@v1.2.2
@@ -56,7 +57,7 @@ jobs:
                         sleep $SLEEP_SECONDS
                       done
 
-                      cat << EOF | sudo tee /etc/nginx/sites-enabled/default > /dev/null
+                      cat << EOF | tee /etc/nginx/sites-enabled/default > /dev/null
                       server {
                         listen 443 ssl http2;
                         listen [::]:443 ssl http2;
