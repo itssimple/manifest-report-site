@@ -3,8 +3,6 @@ import Link from "next/link";
 
 const s3 = new ManifestS3Client();
 
-const JSON_DEBUG = process.env.JSONDEBUG === "true";
-
 export const revalidate = 31536000;
 
 export default async function DiffPage({
@@ -88,9 +86,7 @@ export default async function DiffPage({
             </h2>
             <hr className="w-full" />
             <pre>
-                <code>
-                    {JSON_DEBUG ? JSON.stringify(diffItem, null, 2) : null}
-                </code>
+                <code>{JSON.stringify(diffItem, null, 2)}</code>
             </pre>
         </main>
     );
