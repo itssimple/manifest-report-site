@@ -86,6 +86,7 @@ jobs:
                       }
                       EOF
                       systemctl reload nginx
+                      gh variable set DEPLOY_ENV -b ${{ vars.DEPLOY_ENV == 'green' && 'blue' || 'green' }}
 
             - name: Push success notification to Discord
               if: success()
@@ -107,12 +108,3 @@ jobs:
                   curl -H "Content-Type: multipart/form-data" \
                   -F "payload_json={\"username\": \"Manifest.report Update\", \"content\": \"A new version (${{ vars.DEPLOY_ENV }}) of the manifest-site has failed to upload\"}" \
                   ${{ secrets.DISCORD_WEBHOOK }}
-
-            - name: Change deploy env for next deploy
-              if: success()
-              uses: mmoyaferrer/set-github-variable@v1.0.0
-              with:
-                  name: "DEPLOY_ENV"
-                  value: "${{ vars.DEPLOY_ENV == 'green' && 'blue' || 'green' }}"
-                  repository: "itssimple/manifest-report-site"
-                  token: ${{ secrets.VARIABLE_TOKEN }}
