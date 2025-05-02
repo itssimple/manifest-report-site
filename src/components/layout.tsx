@@ -19,8 +19,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                         <Link href="/">Manifest.Report</Link>{" "}
                     </h1>
                     <h2 className="text-sm md:text-lg ml-auto">
-                        <small className="mr-5 text-gray-600 text-xs"></small>©{" "}
-                        {new Date().getFullYear()} NoLifeKing85#2914
+                        © {new Date().getFullYear()} NoLifeKing85#2914
                     </h2>
                 </div>
             </header>
@@ -33,6 +32,24 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                     </div>
                 </main>
             </div>
+
+            <footer className="p-2 border-t border-blue-200/20 bg-destiny-dark text-gray-600 text-xs items-center">
+                <div className="flex justify-end w-full">
+                    <div className="bg-blue-500/5 rounded-full mr-1 p-1 pl-2 pr-2 inline-block">
+                        Server: {deploy_version}
+                    </div>{" "}
+                    <div className="bg-blue-500/5 rounded-full mr-1 p-1 pl-2 pr-2 inline-block">
+                        <Link
+                            href={`https://github.com/itssimple/manifest-report-site/commit/${BUILD_ID}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-500 hover:text-blue-300 transition-all duration-300"
+                        >
+                            {BUILD_ID}
+                        </Link>
+                    </div>
+                </div>
+            </footer>
         </div>
     );
 };
