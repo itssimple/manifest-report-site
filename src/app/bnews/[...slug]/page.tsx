@@ -17,20 +17,20 @@ Promise<Metadata> {
 
     const ogImages = [];
 
-    if (newsItem?.ImagePath) {
-        ogImages.push({
-            url: newsItem.ImagePath,
-            width: 1920,
-            height: 590,
-        });
-    }
-
     if (newsItem?.OptionalMobileImagePath) {
         ogImages.push({
             url: newsItem.OptionalMobileImagePath,
             width: 570,
             height: 286,
         });
+    } else {
+        if (newsItem?.ImagePath) {
+            ogImages.push({
+                url: newsItem.ImagePath,
+                width: 1920,
+                height: 590,
+            });
+        }
     }
 
     return {
@@ -54,23 +54,6 @@ export default async function Home({
     const { slug } = await params;
     const newsItem = await s3.getNewsItemFromLink(slug.join("/"));
 
-    const ogImages = [];
-
-    if (newsItem?.ImagePath) {
-        ogImages.push({
-            url: newsItem.ImagePath,
-            width: 1920,
-            height: 590,
-        });
-    }
-
-    if (newsItem?.OptionalMobileImagePath) {
-        ogImages.push({
-            url: newsItem.OptionalMobileImagePath,
-            width: 570,
-            height: 286,
-        });
-    }
     return (
         <main className="flex flex-col gap-1 row-start-2 items-center sm:items-start fui body">
             <div className="flex gap-1 items-center flex-col sm:flex-row">
