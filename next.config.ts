@@ -23,6 +23,11 @@ const nextConfig: NextConfig = {
                 hostname: "www.bungie.net",
                 port: "",
             },
+            {
+                protocol: "https",
+                hostname: "images.contentstack.io",
+                port: "",
+            },
         ],
     },
     generateBuildId: async () => {

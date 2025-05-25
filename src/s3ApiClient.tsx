@@ -1,5 +1,6 @@
 import { GetObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { DiffEntryHolder, ManifestListItem } from "./types/manifestListTypes";
+import { BungieNewsItem } from "./types/newsTypes";
 import path from "path";
 import fs from "fs";
 
@@ -21,6 +22,24 @@ class ManifestS3Client {
             endpoint: process.env.S3ENDPOINT!,
             forcePathStyle: true,
         });
+    }
+
+    async getNewsItemFromLink(link: string): Promise<BungieNewsItem | null> {
+        const getNewsItem = new GetObjectCommand({
+            Bucket: "manifest-archive",
+            Key: `news/${link}/item.json`,
+        });
+
+        try {
+            const newsItemObject = await this.s3Client.send(getNewsItem);
+            const newsItemData = JSON.parse(
+                await newsItemObject.Body!.transformToString()
+            );
+            return newsItemData;
+        } catch (error) {
+            console.error(`Error fetching news item from link ${link}:`, error);
+            return null;
+        }
     }
 
     async getManifestList(): Promise<ManifestListItem[]> {
