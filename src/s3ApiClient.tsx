@@ -48,15 +48,22 @@ class ManifestS3Client {
             Key: "list.json",
         });
 
-        const manifestListObject = await this.s3Client.send(getManifestList);
+        try {
+            const manifestListObject = await this.s3Client.send(
+                getManifestList
+            );
 
-        const manifestList: ManifestListItem[] = JSON.parse(
-            await manifestListObject.Body!.transformToString()
-        );
+            const manifestList: ManifestListItem[] = JSON.parse(
+                await manifestListObject.Body!.transformToString()
+            );
 
-        this.manifestList = manifestList;
+            this.manifestList = manifestList;
 
-        return manifestList;
+            return manifestList;
+        } catch (error) {
+            console.error("Error fetching manifest list:", error);
+            return [];
+        }
     }
 
     async getDefinition(version: string, definition: string) {
