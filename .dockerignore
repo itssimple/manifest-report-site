@@ -1,0 +1,7 @@
+Containerfile*
+README.md
+node_modules/
+.next/
+.github/
+*.log
+*.dockerignore
