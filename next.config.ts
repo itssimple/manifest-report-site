@@ -5,6 +5,9 @@ import path from "path";
 
 function getGitHash() {
     try {
+        if (process.env.GITHASH) {
+            return process.env.GITHASH!;
+        }
         // Get short git hash
         return execSync("git rev-parse --short HEAD").toString().trim();
     } catch (error) {

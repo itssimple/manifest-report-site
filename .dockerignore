@@ -3,5 +3,8 @@ README.md
 node_modules/
 .next/
 .github/
+out/
 *.log
 *.dockerignore
+.env*
+.manifest-cache/
