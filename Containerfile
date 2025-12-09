@@ -1,4 +1,4 @@
-FROM node:18.20.8-alpine
+FROM node:18.20.8-alpine AS build
 
 ARG S3ACCESSKEY=
 ARG S3SECRETKEY=
@@ -21,7 +21,13 @@ ENV S3ENDPOINT=${S3ENDPOINT}
 ENV JSONDEBUG=${JSONDEBUG}
 RUN npm run build
 
-COPY --chown=1001:1001 .next .next
+FROM node:18.20.8-alpine AS production
+COPY --chown=1001:1001 --from=build .next .next
+COPY --chown=1001:1001 --from=build public public
+COPY --chown=1001:1001 --from=build *.json *.json
+COPY --chown=1001:1001 --from=build *.ts *.ts
+COPY --chown=1001:1001 --from=build *.mjs *.mjs
+COPY --chown=1001:1001 --from=build node_modules node_modules
 
 ENV DEPLOY_VERSION=${DEPLOY_ENV}
 ENV GITHASH=${GITHASH}
