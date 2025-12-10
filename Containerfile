@@ -1,4 +1,4 @@
-FROM node:18.20.8-alpine AS build
+FROM node:23.5.0-alpine AS build
 
 ARG S3ACCESSKEY=
 ARG S3SECRETKEY=
@@ -7,7 +7,6 @@ ARG GITHASH=
 ARG JSONDEBUG=false
 ARG DEPLOY_ENV=green
 ARG CACHEFOLDER=
-ARG PORT=3001
 
 WORKDIR /app
 
@@ -23,7 +22,10 @@ ENV JSONDEBUG=${JSONDEBUG}
 ENV CACHEFOLDER=${CACHEFOLDER}
 RUN npm run build
 
-FROM node:18.20.8-alpine AS production
+FROM node:23.5.0-alpine AS production
+USER node
+WORKDIR /app
+
 COPY --chown=1001:1001 --from=build .next .next
 COPY --chown=1001:1001 --from=build public public
 COPY --chown=1001:1001 --from=build *.json *.json
@@ -39,8 +41,6 @@ ENV S3ENDPOINT=${S3ENDPOINT}
 ENV JSONDEBUG=${JSONDEBUG}
 ENV NODE_ENV=production
 
-EXPOSE ${PORT}
+EXPOSE 3000
 
-USER node
-
-CMD [ "npm", "run", "start-${DEPLOY_VERSION}" ]
+CMD [ "npm", "run", "start-container" ]

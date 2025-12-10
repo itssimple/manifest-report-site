@@ -8,6 +8,7 @@
         "start": "next start",
         "start-green": "next start -p 3001",
         "start-blue": "next start -p 3002",
+        "start-container": "next start -p 3000",
         "lint": "next lint"
     },
     "dependencies": {
