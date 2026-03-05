@@ -34,6 +34,10 @@ export function valueToPrettyJson(value: any): string {
         return "undefined";
     }
 
+    if (value === null || typeof value === "undefined") {
+        return "";
+    }
+
     return JSON.stringify(value, null, 2);
 }
 

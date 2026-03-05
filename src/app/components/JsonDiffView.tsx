@@ -1,4 +1,4 @@
- "use client";
+"use client";
 
 import { useState } from "react";
 import { DiffEntry } from "@/types/manifestListTypes";
@@ -64,12 +64,12 @@ export function JsonDiffView({ before, after, ops }: JsonDiffViewProps) {
                 </div>
             </div>
 
-            {layout === "inline" && hasBefore && hasAfter && (
+            {
                 <div className="rounded-md bg-slate-950/90 border border-slate-800 overflow-hidden text-xs">
                     <ReactDiffViewer
                         oldValue={valueToPrettyJson(before)}
                         newValue={valueToPrettyJson(after)}
-                        splitView={false}
+                        splitView={layout === "side_by_side" ? true : false}
                         showDiffOnly={false}
                         useDarkTheme={true}
                         hideLineNumbers={false}
@@ -102,34 +102,7 @@ export function JsonDiffView({ before, after, ops }: JsonDiffViewProps) {
                         }}
                     />
                 </div>
-            )}
-
-            {layout === "side_by_side" && (
-                <div className="w-full flex flex-col md:flex-row gap-4">
-                    <div className="w-full md:w-1/2">
-                        <h3 className="text-sm text-gray-400 mb-1">Before</h3>
-                        {hasBefore ? (
-                            <CodeBlock
-                                value={valueToPrettyJson(before)}
-                                className="border border-slate-800"
-                            />
-                        ) : (
-                            <EmptyState label="No full before state available for this entry." />
-                        )}
-                    </div>
-                    <div className="w-full md:w-1/2">
-                        <h3 className="text-sm text-gray-400 mb-1">After</h3>
-                        {hasAfter ? (
-                            <CodeBlock
-                                value={valueToPrettyJson(after)}
-                                className="border border-slate-800"
-                            />
-                        ) : (
-                            <EmptyState label="No full after state available for this entry." />
-                        )}
-                    </div>
-                </div>
-            )}
+            }
 
             <div className="flex flex-col gap-3">
                 {annotations.map((annotation, index) => (
@@ -243,7 +216,8 @@ function DiffEntryCard({ annotation }: DiffEntryCardProps) {
                                 wordAddedBackground: "rgba(16, 185, 129, 0.3)",
                                 wordRemovedBackground:
                                     "rgba(248, 113, 113, 0.3)",
-                                addedGutterBackground: "rgba(5, 150, 105, 0.25)",
+                                addedGutterBackground:
+                                    "rgba(5, 150, 105, 0.25)",
                                 removedGutterBackground:
                                     "rgba(239, 68, 68, 0.25)",
                             },
