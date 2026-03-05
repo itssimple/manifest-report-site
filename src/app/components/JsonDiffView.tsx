@@ -6,8 +6,6 @@ import {
     buildDiffAnnotations,
     valueToPrettyJson,
 } from "@/app/utils/jsonDiffUtils";
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { atomDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 import ReactDiffViewer from "react-diff-viewer-continued";
 
 type JsonDiffViewProps = {
@@ -22,9 +20,6 @@ export function JsonDiffView({ before, after, ops }: JsonDiffViewProps) {
     const [layout, setLayout] = useState<LayoutMode>("inline");
 
     const annotations = buildDiffAnnotations(ops);
-
-    const hasBefore = before !== null && typeof before !== "undefined";
-    const hasAfter = after !== null && typeof after !== "undefined";
 
     return (
         <section className="w-full flex flex-col gap-4">
@@ -113,48 +108,6 @@ export function JsonDiffView({ before, after, ops }: JsonDiffViewProps) {
                 ))}
             </div>
         </section>
-    );
-}
-
-type CodeBlockProps = {
-    value: string;
-    className?: string;
-};
-
-function CodeBlock({ value, className }: CodeBlockProps) {
-    return (
-        <div
-            className={
-                "rounded-md bg-slate-950/80 overflow-auto text-xs " +
-                (className ?? "")
-            }
-        >
-            <SyntaxHighlighter
-                language="json"
-                style={atomDark}
-                customStyle={{
-                    background: "transparent",
-                    margin: 0,
-                    padding: "0.75rem",
-                    fontSize: "0.75rem",
-                }}
-                wrapLongLines={true}
-            >
-                {value}
-            </SyntaxHighlighter>
-        </div>
-    );
-}
-
-type EmptyStateProps = {
-    label: string;
-};
-
-function EmptyState({ label }: EmptyStateProps) {
-    return (
-        <div className="rounded-md border border-dashed border-slate-700 bg-slate-950/60 px-3 py-2 text-xs text-gray-400">
-            {label}
-        </div>
     );
 }
 
