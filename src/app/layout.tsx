@@ -22,6 +22,7 @@ export default function RootLayout({
                     async
                     src="https://user-stats.itssimple.se/script.js"
                     data-website-id="be6cd048-22a3-4ad2-b70b-1e2d5e73ae59"
+                    data-performance="true"
                 />
             </head>
             <body className={`destiny antialiased`}>
